@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
     <style>
       /* Custom scrollbar for financial terminal look */
       ::-webkit-scrollbar {
@@ -40,17 +50,17 @@
     "@angular/common": "https://esm.sh/@angular/common@^21.0.8?external=rxjs",
     "@angular/platform-browser": "https://esm.sh/@angular/platform-browser@^21.0.8?external=rxjs",
     "@angular/core": "https://esm.sh/@angular/core@^21.0.8?external=rxjs",
-    "@angular/compiler": "https://esm.sh/@angular/compiler@^21.0.8?external=rxjs",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0?external=rxjs",
-    "ngx-markdown": "https://esm.sh/ngx-markdown@^21.0.1?external=rxjs",
+    "@angular/forms": "https://esm.sh/@angular/forms@^21.0.8?external=rxjs",
+    "@angular/router": "https://esm.sh/@angular/router@^21.0.8?external=rxjs",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "ngx-markdown": "https://esm.sh/ngx-markdown@^16.0.0?external=@angular/core,@angular/common,@angular/platform-browser,rxjs",
     "d3": "https://esm.sh/d3@^7.9.0",
-    "@angular/forms": "https://esm.sh/@angular/forms@^21.0.8?external=rxjs"
+    "marked": "https://esm.sh/marked@^9.0.0"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <app-root></app-root>
-  </body>
+<body>
+  <app-root></app-root>
+</body>
 </html>
