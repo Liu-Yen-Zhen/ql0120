@@ -41,7 +41,7 @@
     </nav>
   </aside>
 
-  <main class="flex-1 flex flex-col h-screen overflow-hidden">
+  <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
     
     <header class="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-8 flex-shrink-0">
       <div class="flex space-x-6">
@@ -92,9 +92,14 @@
                       <div class="p-4">
                         <ul class="space-y-2 mb-4">
                           @for (task of day.am.tasks; track task) {
-                            <li class="flex items-start cursor-pointer group/item" (click)="toggleTask(task)">
-                              <div class="w-5 h-5 border rounded mr-3 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5" [class.bg-yellow-500]="isTaskCompleted(task)" [class.border-yellow-500]="isTaskCompleted(task)" [class.border-slate-700]="!isTaskCompleted(task)">@if (isTaskCompleted(task)) { <i class="fas fa-check text-black text-xs"></i> }</div>
-                              <span class="text-sm transition-all" [class.opacity-50]="isTaskCompleted(task)" [class.line-through]="isTaskCompleted(task)" [class.text-slate-500]="isTaskCompleted(task)" [class.text-slate-300]="!isTaskCompleted(task)">{{ task }}</span>
+                            <li class="flex items-start justify-between group/item p-2 rounded hover:bg-slate-800/50 transition-colors">
+                              <div class="flex items-start cursor-pointer flex-1" (click)="toggleTask(task)">
+                                <div class="w-5 h-5 border rounded mr-3 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5" [class.bg-yellow-500]="isTaskCompleted(task)" [class.border-yellow-500]="isTaskCompleted(task)" [class.border-slate-700]="!isTaskCompleted(task)">@if (isTaskCompleted(task)) { <i class="fas fa-check text-black text-xs"></i> }</div>
+                                <span class="text-sm transition-all" [class.opacity-50]="isTaskCompleted(task)" [class.line-through]="isTaskCompleted(task)" [class.text-slate-500]="isTaskCompleted(task)" [class.text-slate-300]="!isTaskCompleted(task)">{{ task }}</span>
+                              </div>
+                              <button (click)="openTaskNote(task, $event)" class="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-slate-700 focus:outline-none" [title]="hasNote(task) ? '查看筆記' : '新增筆記'">
+                                <i class="fas fa-book-open text-xs transition-colors" [class.text-cyan-400]="hasNote(task)" [class.text-slate-600]="!hasNote(task)" [class.group-hover/item:text-slate-400]="!hasNote(task)"></i>
+                              </button>
                             </li>
                           }
                         </ul>
@@ -104,7 +109,7 @@
                                  @if (getNoteContent('am')) {
                                     <div class="text-sm text-slate-400 prose prose-invert prose-sm max-w-none"><markdown [data]="getNoteContent('am')"></markdown></div>
                                  } @else {
-                                    <div class="text-xs text-slate-600 italic hover:text-slate-400 transition-colors flex items-center"><i class="fas fa-pen mr-2"></i> Add note...</div>
+                                    <div class="text-xs text-slate-600 italic hover:text-slate-400 transition-colors flex items-center"><i class="fas fa-pen mr-2"></i> Add summary note...</div>
                                  }
                               </div>
                            } @else {
@@ -125,9 +130,14 @@
                       <div class="p-4">
                         <ul class="space-y-2 mb-4">
                           @for (task of day.pm.tasks; track task) {
-                            <li class="flex items-start cursor-pointer group/item" (click)="toggleTask(task)">
-                              <div class="w-5 h-5 border rounded mr-3 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5" [class.bg-blue-500]="isTaskCompleted(task)" [class.border-blue-500]="isTaskCompleted(task)" [class.border-slate-700]="!isTaskCompleted(task)">@if (isTaskCompleted(task)) { <i class="fas fa-check text-black text-xs"></i> }</div>
-                              <span class="text-sm transition-all" [class.opacity-50]="isTaskCompleted(task)" [class.line-through]="isTaskCompleted(task)" [class.text-slate-500]="isTaskCompleted(task)" [class.text-slate-300]="!isTaskCompleted(task)">{{ task }}</span>
+                            <li class="flex items-start justify-between group/item p-2 rounded hover:bg-slate-800/50 transition-colors">
+                              <div class="flex items-start cursor-pointer flex-1" (click)="toggleTask(task)">
+                                <div class="w-5 h-5 border rounded mr-3 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5" [class.bg-blue-500]="isTaskCompleted(task)" [class.border-blue-500]="isTaskCompleted(task)" [class.border-slate-700]="!isTaskCompleted(task)">@if (isTaskCompleted(task)) { <i class="fas fa-check text-black text-xs"></i> }</div>
+                                <span class="text-sm transition-all" [class.opacity-50]="isTaskCompleted(task)" [class.line-through]="isTaskCompleted(task)" [class.text-slate-500]="isTaskCompleted(task)" [class.text-slate-300]="!isTaskCompleted(task)">{{ task }}</span>
+                              </div>
+                              <button (click)="openTaskNote(task, $event)" class="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-slate-700 focus:outline-none" [title]="hasNote(task) ? '查看筆記' : '新增筆記'">
+                                <i class="fas fa-book-open text-xs transition-colors" [class.text-cyan-400]="hasNote(task)" [class.text-slate-600]="!hasNote(task)" [class.group-hover/item:text-slate-400]="!hasNote(task)"></i>
+                              </button>
                             </li>
                           }
                         </ul>
@@ -137,7 +147,7 @@
                                  @if (getNoteContent('pm')) {
                                     <div class="text-sm text-slate-400 prose prose-invert prose-sm max-w-none"><markdown [data]="getNoteContent('pm')"></markdown></div>
                                  } @else {
-                                    <div class="text-xs text-slate-600 italic hover:text-slate-400 transition-colors flex items-center"><i class="fas fa-pen mr-2"></i> Add note...</div>
+                                    <div class="text-xs text-slate-600 italic hover:text-slate-400 transition-colors flex items-center"><i class="fas fa-pen mr-2"></i> Add summary note...</div>
                                  }
                               </div>
                            } @else {
@@ -158,9 +168,14 @@
                       <div class="p-4">
                         <ul class="space-y-2 mb-4">
                           @for (task of day.night.tasks; track task) {
-                            <li class="flex items-start cursor-pointer group/item" (click)="toggleTask(task)">
-                              <div class="w-5 h-5 border rounded mr-3 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5" [class.bg-purple-500]="isTaskCompleted(task)" [class.border-purple-500]="isTaskCompleted(task)" [class.border-slate-700]="!isTaskCompleted(task)">@if (isTaskCompleted(task)) { <i class="fas fa-check text-black text-xs"></i> }</div>
-                              <span class="text-sm transition-all" [class.opacity-50]="isTaskCompleted(task)" [class.line-through]="isTaskCompleted(task)" [class.text-slate-500]="isTaskCompleted(task)" [class.text-slate-300]="!isTaskCompleted(task)">{{ task }}</span>
+                            <li class="flex items-start justify-between group/item p-2 rounded hover:bg-slate-800/50 transition-colors">
+                              <div class="flex items-start cursor-pointer flex-1" (click)="toggleTask(task)">
+                                <div class="w-5 h-5 border rounded mr-3 flex items-center justify-center flex-shrink-0 transition-colors mt-0.5" [class.bg-purple-500]="isTaskCompleted(task)" [class.border-purple-500]="isTaskCompleted(task)" [class.border-slate-700]="!isTaskCompleted(task)">@if (isTaskCompleted(task)) { <i class="fas fa-check text-black text-xs"></i> }</div>
+                                <span class="text-sm transition-all" [class.opacity-50]="isTaskCompleted(task)" [class.line-through]="isTaskCompleted(task)" [class.text-slate-500]="isTaskCompleted(task)" [class.text-slate-300]="!isTaskCompleted(task)">{{ task }}</span>
+                              </div>
+                              <button (click)="openTaskNote(task, $event)" class="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-slate-700 focus:outline-none" [title]="hasNote(task) ? '查看筆記' : '新增筆記'">
+                                <i class="fas fa-book-open text-xs transition-colors" [class.text-cyan-400]="hasNote(task)" [class.text-slate-600]="!hasNote(task)" [class.group-hover/item:text-slate-400]="!hasNote(task)"></i>
+                              </button>
                             </li>
                           }
                         </ul>
@@ -170,7 +185,7 @@
                                  @if (getNoteContent('night')) {
                                     <div class="text-sm text-slate-400 prose prose-invert prose-sm max-w-none"><markdown [data]="getNoteContent('night')"></markdown></div>
                                  } @else {
-                                    <div class="text-xs text-slate-600 italic hover:text-slate-400 transition-colors flex items-center"><i class="fas fa-pen mr-2"></i> Add note...</div>
+                                    <div class="text-xs text-slate-600 italic hover:text-slate-400 transition-colors flex items-center"><i class="fas fa-pen mr-2"></i> Add summary note...</div>
                                  }
                               </div>
                            } @else {
@@ -197,5 +212,57 @@
         </div>
       }
       </div>
+
+    @if (activeTask()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden m-4">
+        
+        <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950">
+          <div class="flex items-center">
+            <i class="fas fa-book-reader text-cyan-400 mr-3 text-xl"></i>
+            <div>
+              <h3 class="text-lg font-bold text-white">{{ activeTask() }}</h3>
+              <p class="text-xs text-slate-500">學習筆記與知識卡片</p>
+            </div>
+          </div>
+          <button (click)="closeTaskNote()" class="text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-800">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+          
+          <div class="flex-1 border-r border-slate-800 flex flex-col min-h-[50%] md:min-h-0 bg-slate-900">
+            <div class="px-4 py-2 bg-slate-900/50 border-b border-slate-800 text-xs text-slate-500 font-mono flex justify-between">
+              <span>MARKDOWN EDITOR</span>
+              <span class="text-slate-600">支援 LaTeX ($E=mc^2$) 與 Code Block</span>
+            </div>
+            <textarea #noteInput 
+                      class="flex-1 w-full bg-slate-900 text-slate-300 p-4 text-sm resize-none focus:outline-none font-mono leading-relaxed"
+                      [value]="getCurrentTaskNoteContent()"
+                      (input)="saveCurrentTaskNote(noteInput.value)"
+                      placeholder="在這裡寫下你的學習心得、代碼片段或數學推導..."></textarea>
+          </div>
+
+          <div class="flex-1 bg-slate-950 flex flex-col min-h-[50%] md:min-h-0">
+            <div class="px-4 py-2 bg-slate-950 border-b border-slate-800 text-xs text-slate-500 font-mono">
+              PREVIEW
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none">
+              @if (getCurrentTaskNoteContent()) {
+                <markdown [data]="getCurrentTaskNoteContent()"></markdown>
+              } @else {
+                <div class="h-full flex flex-col items-center justify-center text-slate-600 opacity-50">
+                  <i class="fas fa-pencil-alt text-4xl mb-4"></i>
+                  <p>開始在左側輸入筆記...</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
   </main>
 </div>
