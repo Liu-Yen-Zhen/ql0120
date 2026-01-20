@@ -24,19 +24,14 @@ interface DailyTask {
   yushi_focus: string;
 }
 
-interface LogEntry {
-  id: string;
-  dayId: string;
-  timestamp: number;
-  content: string;
-  type: 'theory' | 'code' | 'bug' | 'idea'; // 新增 type
-}
-
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, MarkdownModule, FormsModule],
-  providers: [provideMarkdown()],
+  // 這裡啟用了 KaTeX 支援，讓你的筆記可以寫數學公式
+  providers: [provideMarkdown({
+    katex: true 
+  })],
   templateUrl: './app.component.html',
   styleUrls: []
 })
@@ -49,11 +44,14 @@ export class AppComponent {
   selectedWeekId = signal<number>(1);
   selectedDayIndex = signal<number>(0);
 
-  // Completed Tasks & Logs (Persisted)
+  // Completed Tasks
   completedTasks = signal<Set<string>>(new Set<string>());
-  learningLogs = signal<LogEntry[]>([]);
-  currentLogInput = signal<string>('');
-  currentLogType = signal<'theory' | 'code' | 'bug' | 'idea'>('idea'); // 新增當前筆記類型
+  
+  // NEW: Block Notes System (Key: "W1D1_am", Value: "My notes...")
+  blockNotes = signal<Record<string, string>>({});
+  
+  // Track which block is currently being edited (e.g. "W1D1_am")
+  editingBlock = signal<string | null>(null);
 
   // AI & Interview State
   tutorLoading = signal<boolean>(false);
@@ -179,11 +177,12 @@ export class AppComponent {
     // Load persisted state
     this.completedTasks.set(new Set(JSON.parse(localStorage.getItem('quant_tasks') || '[]')));
     
+    // LOAD NOTES from local storage
     try {
-      const savedLogs = localStorage.getItem('quant_learning_logs');
-      if (savedLogs) this.learningLogs.set(JSON.parse(savedLogs));
+      const savedNotes = localStorage.getItem('quant_block_notes');
+      if (savedNotes) this.blockNotes.set(JSON.parse(savedNotes));
     } catch (e) {
-      console.warn('Failed to parse logs', e);
+      console.warn('Failed to parse notes', e);
     }
 
     // Persist effects
@@ -191,8 +190,9 @@ export class AppComponent {
       localStorage.setItem('quant_tasks', JSON.stringify(Array.from(this.completedTasks())));
     });
 
+    // Save Notes when updated
     effect(() => {
-      localStorage.setItem('quant_learning_logs', JSON.stringify(this.learningLogs()));
+      localStorage.setItem('quant_block_notes', JSON.stringify(this.blockNotes()));
     });
 
     // Draw Chart
@@ -233,10 +233,17 @@ export class AppComponent {
   currentPhaseData = computed(() => this.phases.find(p => p.id === this.currentWeekData()?.phaseId));
   currentWeekSchedule = computed(() => this.detailedSchedule[this.selectedWeekId()] || []);
   currentDaySchedule = computed(() => this.currentWeekSchedule()[this.selectedDayIndex()] || this.currentWeekSchedule()[0]);
-  currentDayLogs = computed(() => {
+  
+  // Helper to generate key: "W1D1_am"
+  getNoteKey(period: 'am' | 'pm' | 'night'): string {
     const dayId = this.currentDaySchedule()?.day_id;
-    return this.learningLogs().filter(l => l.dayId === dayId).sort((a, b) => b.timestamp - a.timestamp);
-  });
+    return `${dayId}_${period}`;
+  }
+
+  // Helper to get content for current view
+  getNoteContent(period: 'am' | 'pm' | 'night'): string {
+    return this.blockNotes()[this.getNoteKey(period)] || '';
+  }
 
   // --- Actions ---
   selectWeek(id: number) { this.selectedWeekId.set(id); this.selectedDayIndex.set(0); this.resetAI(); }
@@ -253,48 +260,25 @@ export class AppComponent {
   }
   isTaskCompleted(task: string) { return this.completedTasks().has(task); }
 
-  // 新增：切換筆記類型
-  setLogType(type: 'theory' | 'code' | 'bug' | 'idea') {
-    this.currentLogType.set(type);
+  // --- Note Logic ---
+  startEditing(period: 'am' | 'pm' | 'night') {
+    this.editingBlock.set(this.getNoteKey(period));
   }
 
-  // 修改：儲存時加入 type
-  addLog() {
-    const content = this.currentLogInput().trim();
-    if (!content) return;
-    this.learningLogs.update(logs => [{ 
-      id: crypto.randomUUID(), 
-      dayId: this.currentDaySchedule()?.day_id, 
-      timestamp: Date.now(), 
-      content,
-      type: this.currentLogType() // 儲存當前類型
-    }, ...logs]);
-    this.currentLogInput.set('');
+  saveNote(period: 'am' | 'pm' | 'night', content: string) {
+    const key = this.getNoteKey(period);
+    this.blockNotes.update(notes => ({ ...notes, [key]: content }));
+    this.editingBlock.set(null); // Exit edit mode
   }
-  deleteLog(id: string) { this.learningLogs.update(logs => logs.filter(l => l.id !== id)); }
+  
+  cancelEdit() {
+    this.editingBlock.set(null);
+  }
 
-  // 新增：生成每日總結
-  async generateDailySummary() {
-    const logs = this.currentDayLogs().map(l => ({ type: l.type || 'idea', content: l.content }));
-    const title = this.currentDaySchedule()?.title || 'Quant Study';
-    
-    this.tutorLoading.set(true);
-    this.tutorConcept.set('每日學習總結');
-    this.tutorResponse.set(''); // 清空舊內容
-    
-    const summary = await this.geminiService.summarizeDailyLogs(logs, title);
-    this.tutorResponse.set(summary);
-    this.tutorLoading.set(false);
-    
-    // 自動將總結也存成一條特殊的筆記
-    this.learningLogs.update(prev => [{
-      id: crypto.randomUUID(),
-      dayId: this.currentDaySchedule()?.day_id,
-      timestamp: Date.now(),
-      content: `## 🤖 AI Daily Recap\n${summary}`,
-      type: 'idea'
-    }, ...prev]);
+  isEditing(period: 'am' | 'pm' | 'night'): boolean {
+    return this.editingBlock() === this.getNoteKey(period);
   }
+
 
   // --- D3 ---
   drawRadarChart(skills: { [key: string]: number }) {
