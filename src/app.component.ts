@@ -173,18 +173,35 @@ export class AppComponent {
     ]
   };
 
-  constructor() {
-    // Load persisted state
-    this.completedTasks.set(new Set(JSON.parse(localStorage.getItem('quant_tasks') || '[]')));
-    
-    // LOAD NOTES from local storage
-    try {
-      const savedNotes = localStorage.getItem('quant_block_notes');
-      if (savedNotes) this.blockNotes.set(JSON.parse(savedNotes));
-    } catch (e) {
-      console.warn('Failed to parse notes', e);
-    }
+  // 記得引入 PLATFORM_ID 和 isPlatformBrowser
+import { Component, inject, signal, computed, effect, ElementRef, viewChild, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
+// ... class 內部 ...
+
+  private platformId = inject(PLATFORM_ID); // 注入平台 ID
+
+  constructor() {
+    // ✅ 加入這行檢查：只有在「瀏覽器」環境下才執行讀取
+    if (isPlatformBrowser(this.platformId)) {
+      
+      // 讀取 Tasks
+      try {
+        const savedTasks = localStorage.getItem('quant_tasks');
+        if (savedTasks) {
+           this.completedTasks.set(new Set(JSON.parse(savedTasks)));
+        }
+      } catch (e) { console.warn('Failed to load tasks', e); }
+
+      // 讀取 Notes
+      try {
+        const savedNotes = localStorage.getItem('quant_block_notes');
+        if (savedNotes) {
+          this.blockNotes.set(JSON.parse(savedNotes));
+        }
+      } catch (e) { console.warn('Failed to load notes', e); }
+    }
+    
     // Persist effects
     effect(() => {
       localStorage.setItem('quant_tasks', JSON.stringify(Array.from(this.completedTasks())));
